@@ -40,7 +40,7 @@ With n blocks, the minimum achievable two-sided permutation p-value is 2/2^n. Bl
 
 ## Roadmap
 
-This prototype accompanies a Ruby Association 2026 grant application. None of the following exists yet; it is the planned grant-period work:
+None of the following exists yet; it is the planned grant-period work:
 
 - benchmark-driver adapter
 - packaged GitHub Action
