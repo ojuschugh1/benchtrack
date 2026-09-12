@@ -1,5 +1,7 @@
 # BenchTrack
 
+[![CI](https://github.com/ojuschugh1/benchtrack/actions/workflows/ci.yml/badge.svg)](https://github.com/ojuschugh1/benchtrack/actions/workflows/ci.yml)
+
 BenchTrack is pull-request-time performance regression testing for Ruby libraries. It takes an existing benchmark-ips suite, unmodified, and turns it into a paired base-versus-head comparison: both git refs are checked out into worktrees, measured in interleaved randomized blocks under one pinned Ruby, and the check fails only when a slowdown is both larger than a practical threshold and statistically supported. BenchTrack is Ruby-native and service-free: no hosted backend, no runtime gem dependencies, everything runs on the machine you invoke it on.
 
 ## Install
@@ -9,6 +11,8 @@ gem install benchtrack
 ```
 
 Requires Ruby 3.1 or newer, Linux or macOS, and git. The measured project needs benchmark-ips in its bundle; BenchTrack itself declares zero runtime dependencies.
+
+You can also run it straight from a checkout without installing anything: clone the repository and invoke `ruby -I/path/to/benchtrack/lib /path/to/benchtrack/exe/benchtrack ...`. There is nothing to build and no dependency beyond a Ruby that can load benchmark-ips for the project being measured.
 
 ## Quickstart
 
@@ -24,7 +28,11 @@ Then compare two refs:
 benchtrack compare main my-branch --suite bench/ips.rb
 ```
 
-`--suite` is required and is a path relative to the repository root. Optional flags: `--blocks N` (measurement blocks, default 10), `--threshold PCT` (practical slowdown threshold in percent, default 5.0), `--seed N` (integer seed for reproducible runs, generated and recorded when absent), and `--json PATH` (report path, default `benchtrack-report.json`).
+`--suite` is required and is a path relative to the repository root. Optional flags: `--blocks N` (measurement blocks, default 10), `--threshold PCT` (practical slowdown threshold in percent, default 5.0), `--seed N` (integer seed for reproducible runs, generated and recorded when absent), `--json PATH` (report path, default `benchtrack-report.json`), and `--prepare CMD` (shell command run in each worktree after bundle install).
+
+Gems with C extensions need a build step in each worktree before the suite can load them, for example `--prepare 'bundle exec rake compile'`. The command runs with the worktree as its working directory and with the Ruby being measured first on `PATH`, and a nonzero exit aborts the comparison.
+
+A suite file may call `Benchmark.ips` more than once. A report name that repeats across calls gets the call number appended, so the `json` report of the third call is labelled `json [3]`, while names that appear only once in the file are left alone.
 
 The exit status is 0 when every benchmark passes, 1 when at least one supported regression is found, and 2 on operational errors such as unresolvable refs, failed dependency installs, or unparseable suite output. Every completed comparison also writes a JSON report with per-entry statistics and an environment fingerprint, so CI can archive it and scripts can parse it.
 
@@ -40,7 +48,7 @@ With n blocks, the minimum achievable two-sided permutation p-value is 2/2^n. Bl
 
 ## Roadmap
 
-None of the following exists yet; it is the planned grant-period work:
+None of the following exists yet; it is planned next work:
 
 - benchmark-driver adapter
 - packaged GitHub Action
