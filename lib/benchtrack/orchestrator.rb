@@ -5,6 +5,7 @@ require "tmpdir"
 require "fileutils"
 require "digest"
 require "rbconfig"
+require "bundler"
 
 module BenchTrack
   module Orchestrator
@@ -12,7 +13,7 @@ module BenchTrack
 
     def compare(config)
       repo = Dir.pwd
-      _, status = run_command({}, "git", "rev-parse", "--git-dir", chdir: repo)
+      _, status = Open3.capture2e("git", "rev-parse", "--git-dir", chdir: repo)
       raise GitError, "not inside a git repository: #{repo}" unless status.success?
 
       shas = { base: resolve_ref!(config.base), head: resolve_ref!(config.head) }
@@ -87,7 +88,7 @@ module BenchTrack
     end
 
     def run_command(env, *argv, chdir:)
-      Open3.capture2e(env, *argv, chdir: chdir)
+      Bundler.with_unbundled_env { Open3.capture2e(env, *argv, chdir: chdir) }
     end
 
     def install_bundle(side, worktree, tmp)

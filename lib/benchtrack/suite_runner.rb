@@ -4,6 +4,7 @@ require "open3"
 require "json"
 require "tmpdir"
 require "rbconfig"
+require "bundler"
 
 module BenchTrack
   module SuiteRunner
@@ -21,8 +22,9 @@ module BenchTrack
         argv = [RbConfig.ruby]
         argv << "-rbundler/setup" if env.key?("BUNDLE_GEMFILE")
         argv.push("-r", SHIM, suite_path)
-        out, status = Open3.capture2e(env.merge("BENCHTRACK_RESULT_PATH" => result_path),
-                                      *argv, chdir: chdir)
+        out, status = Bundler.with_unbundled_env do
+          Open3.capture2e(env.merge("BENCHTRACK_RESULT_PATH" => result_path), *argv, chdir: chdir)
+        end
         unless status.success?
           raise SuiteError, "suite exited with status #{status.exitstatus || status}:\n#{out}"
         end
