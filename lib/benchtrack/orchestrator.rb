@@ -32,6 +32,7 @@ module BenchTrack
           worktrees.each do |side, dir|
             envs[side] = install_bundle(side, dir, tmp)
             lockfile_hashes[side.to_s] = lockfile_hash(dir)
+            prepare_worktree(side, dir, envs[side], config.prepare) if config.prepare
           end
 
           worktrees.each do |side, dir|
@@ -99,6 +100,12 @@ module BenchTrack
       raise BundleError, "bundle install failed for #{side}:\n#{out}" unless status.success?
 
       env
+    end
+
+    def prepare_worktree(side, worktree, env, command)
+      path = "#{File.dirname(RbConfig.ruby)}#{File::PATH_SEPARATOR}#{ENV['PATH']}"
+      out, status = run_command(env.merge("PATH" => path), "sh", "-c", command, chdir: worktree)
+      raise PrepareError, "prepare command failed for #{side}:\n#{out}" unless status.success?
     end
 
     def lockfile_hash(worktree)

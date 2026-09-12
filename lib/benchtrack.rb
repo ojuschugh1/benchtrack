@@ -3,15 +3,16 @@
 require_relative "benchtrack/version"
 
 module BenchTrack
-  Error       = Class.new(StandardError)
-  ConfigError = Class.new(Error)
-  SuiteError  = Class.new(Error)
-  GitError    = Class.new(Error)
-  BundleError = Class.new(Error)
+  Error        = Class.new(StandardError)
+  ConfigError  = Class.new(Error)
+  SuiteError   = Class.new(Error)
+  GitError     = Class.new(Error)
+  BundleError  = Class.new(Error)
+  PrepareError = Class.new(Error)
 
   Entry        = Struct.new(:label, :ips)
   Config       = Struct.new(:command, :suite, :base, :head, :threshold_pct,
-                            :blocks, :seed, :json_path, keyword_init: true)
+                            :blocks, :seed, :json_path, :prepare, keyword_init: true)
   PairedSeries = Struct.new(:label, :base, :head)
   EntryResult  = Struct.new(:label, :effect, :ci_low, :ci_high, :p_value, :holm_p,
                             :percent_change, :slowdown_pct, :verdict, keyword_init: true)

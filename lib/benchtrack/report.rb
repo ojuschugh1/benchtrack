@@ -66,7 +66,8 @@ module BenchTrack
           "base_sha" => comparison.base_sha,
           "head_sha" => comparison.head_sha
         },
-        "config" => { "threshold_pct" => config.threshold_pct, "alpha" => Stats::ALPHA },
+        "config" => { "threshold_pct" => config.threshold_pct, "alpha" => Stats::ALPHA,
+                      "prepare" => config.prepare },
         "entries" => comparison.results.map { |result| entry_hash(result) },
         "unmatched_labels" => {
           "base_only" => comparison.base_only,

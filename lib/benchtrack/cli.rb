@@ -22,6 +22,7 @@ module BenchTrack
               --threshold PCT   practical slowdown threshold in percent (default 5.0)
               --seed N          integer seed for reproducible runs (default: generated)
               --json PATH       JSON report path (default benchtrack-report.json)
+              --prepare CMD     shell command run in each worktree after bundle install (e.g. 'bundle exec rake compile')
     TEXT
 
     def self.start(argv)
@@ -59,7 +60,7 @@ module BenchTrack
       config = Config.new(command: "compare", suite: options[:suite], base: base, head: head,
                           threshold_pct: options[:threshold_pct], blocks: options[:blocks],
                           seed: options[:seed] || Random.new_seed % (2**32),
-                          json_path: options[:json_path])
+                          json_path: options[:json_path], prepare: options[:prepare])
 
       comparison = Orchestrator.compare(config)
       print Report.terminal(comparison)
@@ -74,6 +75,7 @@ module BenchTrack
         o.on("--threshold PCT") { |v| options[:threshold_pct] = parse_threshold(v) }
         o.on("--seed N")        { |v| options[:seed] = parse_seed(v) }
         o.on("--json PATH")     { |v| options[:json_path] = v }
+        o.on("--prepare CMD")   { |v| options[:prepare] = v }
       end
     end
 
