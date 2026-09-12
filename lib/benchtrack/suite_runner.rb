@@ -55,8 +55,8 @@ module BenchTrack
         raise SuiteError, "unrecognized benchmark result format#{suffix}"
       end
 
-      ips_by_label = {}
-      data["entries"].each do |item|
+      seen = {}
+      data["entries"].map do |item|
         label = item.is_a?(Hash) ? item["label"] : nil
         ips   = item.is_a?(Hash) ? item["ips"] : nil
         unless label.is_a?(String) && !label.empty?
@@ -65,9 +65,11 @@ module BenchTrack
         unless ips.is_a?(Numeric) && ips.to_f.finite? && ips.to_f.positive?
           raise SuiteError, "benchmark entry #{label.inspect} has invalid ips #{ips.inspect}#{suffix}"
         end
-        ips_by_label[label] = ips.to_f
+        raise SuiteError, "duplicate benchmark label #{label.inspect}#{suffix}" if seen[label]
+
+        seen[label] = true
+        Entry.new(label, ips.to_f)
       end
-      ips_by_label.map { |label, ips| Entry.new(label, ips) }
     end
   end
 end

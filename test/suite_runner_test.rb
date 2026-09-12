@@ -20,17 +20,19 @@ class SuiteRunnerParseResultTest < Minitest::Test
     assert_equal [1234.5, 67.89, 0.25], entries.map(&:ips)
   end
 
-  def test_duplicate_labels_keep_last_ips_at_first_position
+  def test_duplicate_labels_raise_suite_error_naming_the_label
     text = JSON.generate(
       "format" => 1,
       "entries" => [
-        { "label" => "a", "ips" => 1.0 },
+        { "label" => "json", "ips" => 1.0 },
         { "label" => "b", "ips" => 2.0 },
-        { "label" => "a", "ips" => 9.0 }
+        { "label" => "json", "ips" => 9.0 }
       ]
     )
-    entries = BenchTrack::SuiteRunner.parse_result(text)
-    assert_equal [["a", 9.0], ["b", 2.0]], entries.map { |e| [e.label, e.ips] }
+    error = assert_raises(BenchTrack::SuiteError) do
+      BenchTrack::SuiteRunner.parse_result(text)
+    end
+    assert_match(/duplicate benchmark label "json"/, error.message)
   end
 
   def test_invalid_json_raises_suite_error

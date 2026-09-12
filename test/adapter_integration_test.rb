@@ -25,6 +25,17 @@ class AdapterIntegrationTest < Minitest::Test
     end
   end
 
+  def test_repeated_labels_are_scoped_to_their_ips_call
+    entries = run_fixture("suite_repeated.rb")
+
+    assert_equal ["a [1]", "b", "a [2]", "c"], entries.map(&:label)
+    entries.each do |entry|
+      assert_instance_of Float, entry.ips
+      assert_predicate entry.ips, :finite?
+      assert_predicate entry.ips, :positive?
+    end
+  end
+
   def test_raising_suite_surfaces_exit_status_and_output
     error = assert_raises(BenchTrack::SuiteError) { run_fixture("suite_raises.rb") }
 
