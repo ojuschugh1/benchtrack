@@ -111,9 +111,11 @@ class GatingTest < Minitest::Test
   def with_orchestrator_returning(comparison)
     singleton = BenchTrack::Orchestrator.singleton_class
     singleton.send(:alias_method, :__gating_test_compare, :compare)
+    singleton.send(:remove_method, :compare)
     BenchTrack::Orchestrator.define_singleton_method(:compare) { |_config| comparison }
     yield
   ensure
+    singleton.send(:remove_method, :compare)
     singleton.send(:alias_method, :compare, :__gating_test_compare)
     singleton.send(:remove_method, :__gating_test_compare)
   end
